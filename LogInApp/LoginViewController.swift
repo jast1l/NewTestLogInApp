@@ -59,12 +59,12 @@ extension LoginViewController: UITextFieldDelegate {
     
     func textFieldDidEndEditing(_ textField: UITextField) {
         guard let loginTest = loginTF.text, !loginTest.isEmpty else {
-            showAlert(title: .Login)
+            showAlert(title: .login)
             return
         }
         
         if let _ = Int(loginTest) {
-            showAlert(title: .Robot)
+            showAlert(title: .robot)
             return
         }
         
@@ -81,8 +81,8 @@ extension LoginViewController: UITextFieldDelegate {
 extension LoginViewController {
     
     private enum Allert: String {
-        case Login = "You forgot to enter a name"
-        case Robot = "We are not robots, enter the correct name not from numbers, dilute it at least with letters."
+        case login = "You forgot to enter a name"
+        case robot = "We are not robots, enter the correct name not from numbers, dilute it at least with letters."
     }
     
     private func showAlert(title: Allert) {
@@ -91,7 +91,7 @@ extension LoginViewController {
         
         let action = UIAlertAction(title: "OK", style: .default)
         
-        let alert = UIAlertController(title: name, message: message, preferredStyle: .alert)
+        let alert = UIAlertController(title: name.capitalized, message: message, preferredStyle: .alert)
         alert.addAction(action)
         
         present(alert, animated: true)
