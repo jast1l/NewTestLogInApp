@@ -8,94 +8,103 @@
 import UIKit
 
 class LoginViewController: UIViewController {
-
+    
     @IBOutlet weak var loginTF: UITextField!
     @IBOutlet weak var passwordTF: UITextField!
-    
     @IBOutlet weak var logInButton: UIButton!
     
+    // MARK: - Private properties
+    private let user = "User"
+    private let password = "Password"
+    
+    // MARK: - DidLoad
     override func viewDidLoad() {
         super.viewDidLoad()
         
         loginTF.delegate = self
         passwordTF.delegate = self
         
+        logInButton.layer.cornerRadius = 10
+        logInButton.layer.backgroundColor = #colorLiteral(red: 0.1802025139, green: 0.4792167544, blue: 0.9991418719, alpha: 1)
+        logInButton.alpha = 0.6
         logInButton.isEnabled = false
     }
-
+    
+    //MARK: - Navigation
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        guard let welcomeVC = segue.destination as? WelcomeViewController else { return }
+        welcomeVC.name = loginTF.text
+    }
+    
     @IBAction func unwind(for segue: UIStoryboardSegue) {
         loginTF.text = nil
         passwordTF.text = nil
         logInButton.isEnabled = false
     }
     
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        self.view.endEditing(true)
+    //MARK: -Button
+    @IBAction func logInPressed() {
+        if loginTF.text != user || passwordTF.text != password {
+            showAlert(
+                title: "Invalid login or password",
+                message: "Please, enter correct login and password",
+                textField: passwordTF
+            )
+            return
+        }
     }
     
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        guard let welcomeVC = segue.destination as? WelcomeViewController else { return }
-        welcomeVC.name = loginTF.text
+    @IBAction func forgotRegisterData(_ sender: UIButton) {
+        sender.tag == 0
+            ? showAlert(title: "Oops!", message: "Your name is \(user) 😉")
+            : showAlert(title: "Oops!", message: "Your password is \(password) 😉")
     }
 }
 
 
 
+//MARK: -Keyboard manager
 extension LoginViewController: UITextFieldDelegate {
- 
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        changeTextField(textField)
-        return true
-        }
-    
-    func changeTextField(_ textField: UITextField) {
-        switch textField {
-        case self.loginTF :
-            self.passwordTF.becomeFirstResponder()
-        default:
-            self.performSegue(withIdentifier: "welcomeVC", sender: nil)
-        }
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
+        view.endEditing(true)
     }
     
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        guard let loginTest = loginTF.text, !loginTest.isEmpty else {
-            showAlert(title: .login)
-            return
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if textField == loginTF {
+            passwordTF.becomeFirstResponder()
+        } else {
+            logInPressed()
         }
-        
-        if let _ = Int(loginTest) {
-            showAlert(title: .robot)
-            return
+        return true
+    }
+    
+    func textFieldDidChangeSelection(_ textField: UITextField) {
+        if let passwordTF = passwordTF.text,
+           passwordTF != "",
+           let loginTF = loginTF.text,
+           loginTF != "" {
+            
+            logInButton.alpha = 1
+            logInButton.isEnabled = true
+        } else {
+            logInButton.alpha = 0.6
+            logInButton.isEnabled = false
         }
-        
-        guard let passTest = passwordTF.text, !passTest.isEmpty else {
-            return
-        }
-        
-        logInButton.isEnabled = true
     }
 }
 
 
 
+//MARK: -AlerController
 extension LoginViewController {
-    
-    private enum Allert: String {
-        case login = "You forgot to enter a name"
-        case robot = "We are not robots, enter the correct name not from numbers, dilute it at least with letters."
-    }
-    
-    private func showAlert(title: Allert) {
-        let name = "\(title)"
-        let message = title.rawValue
-        
-        let action = UIAlertAction(title: "OK", style: .default)
-        
-        let alert = UIAlertController(title: name.capitalized, message: message, preferredStyle: .alert)
-        alert.addAction(action)
-        
+    private func showAlert(title: String, message: String, textField: UITextField? = nil) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK", style: .default) { _ in
+            textField?.text = ""
+        }
+        alert.addAction(okAction)
         present(alert, animated: true)
-        
     }
 }
 
